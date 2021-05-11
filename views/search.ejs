@@ -1,0 +1,90 @@
+<%- include("_header") -%>
+
+<h2> Find Customers</h2>
+
+<h4>Total number of records in the database: <%= totRecs %> </h4>
+
+<!-- Not using bootstrap, just a simple form that you may enhance -->
+<form action="/search" method="POST">
+    <table>
+        <tr>
+            <td><label for="cusid">ID</label>:</td>
+            <td><input type="number" name="cusid" id="cusid" /></td>
+            <td>(equal)</td>
+        </tr>
+        <tr>
+            <td><label for="cusfname">First Name</label>:</td>
+            <td><input type="text" name="cusfname" id="cusfname" /></td>
+            <td>(begins with)</td>
+        </tr>
+        <tr>
+            <td><label for="cuslname">Last Name</label>:</td>
+            <td><input type="text" name="cuslname" id="cuslname" /></td>
+            <td>(begins with)</td>
+        </tr>
+        <tr>
+            <td><label for="cusstate">State</label>:</td>
+            <td><input type="text" name="cusstate" id="cusstate" maxlength="2" /></td>
+            <td>(equal)</td>
+        </tr>
+        <tr>
+            <td><label for="cussalesytd">Sales YTD</label>:</td>
+            <td><input type="number" name="cussalesytd" id="cussalesytd" /></td>
+            <td>(greater than or equal)</td>
+        </tr>
+        <tr>
+            <td><label for="cussalesprev">Previous Years Sales</label>:</td>
+            <td><input type="number" name="cussalesprev" id="cussalesprev" /></td>
+            <td>(greater than or equal)</td>
+        </tr>
+        <tr>
+            <td span="2">
+                <input type="submit" value="Find" />
+                <input type="reset" value="Reset" />
+            </td>
+        </tr>
+    </table>
+</form>
+
+<!-- Omitted Error Checking / Needs to be added -->
+<% if (type === "post") { %>
+    <% if (result.result.length === 0) { %>
+        <h3>No records found!</h3>
+    <% } else { %>
+        <h4>Number of Records Found: <%= result.result.length %> </h4>
+        <table style="width:50%">
+            <thead>
+                <tr>
+                    <th>ID  </th>
+                    <th>First Name  </th>
+                    <th>Last Name  </th>
+                    <th>State  </th>
+                    <th>Sales YTD  </th>
+                    <th>Previous Years Sales  </th>
+                    <th class="d-print-none">
+                        <a class="btn btn-sm btn-success" href="/create">Create Customer</a>
+                      </th>
+                </tr>
+            </thead>
+            <tbody>
+                <% result.result.forEach(customer => { %> 
+                    <tr>
+                        <td align="center"><%= customer.cusid %></td>
+                        <td align="center"><%= customer.cusfname %></td>
+                        <td align="center"><%= customer.cuslname %></td>
+                        <td align="center"><%= customer.cusstate %></td>
+                        <td align="center"><%= customer.cussalesytd %></td>
+                        <td align="center"><%= customer.cussalesprev %></td>
+                        <td class="d-print-none">
+                            <a class="btn btn-sm btn-warning" href="/edit/<%= customer.cusid %>">Edit</a>
+                            <a class="btn btn-sm btn-danger" href="/delete/<%= customer.cusid %>">Delete</a>
+                          </td>
+                    </tr>
+                <% }); %>
+            </tbody>
+
+        </table>
+    <% } %>
+<% } %>
+
+<%- include("_footer") -%>   
