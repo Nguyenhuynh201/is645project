@@ -9,44 +9,44 @@
     <table>
         <tr>
             <td><label for="cusid">ID</label>:</td>
-            <td><input type="number" name="cusid" id="cusid" /></td>
+            <td><input type="number" name="cusid" id="cusid" value="<%= cust.cusid %>"  /></td>
             <td>(equal)</td>
         </tr>
         <tr>
             <td><label for="cusfname">First Name</label>:</td>
-            <td><input type="text" name="cusfname" id="cusfname" /></td>
+            <td><input type="text" name="cusfname" id="cusfname" value="<%= cust.cusfname %>" /></td>
             <td>(begins with)</td>
         </tr>
         <tr>
             <td><label for="cuslname">Last Name</label>:</td>
-            <td><input type="text" name="cuslname" id="cuslname" /></td>
+            <td><input type="text" name="cuslname" id="cuslname"  value="<%= cust.cuslname %>" /></td>
             <td>(begins with)</td>
         </tr>
         <tr>
             <td><label for="cusstate">State</label>:</td>
-            <td><input type="text" name="cusstate" id="cusstate" maxlength="2" /></td>
+            <td><input type="text" name="cusstate" id="cusstate" maxlength="2" value="<%= cust.cusstate %>"  /></td>
             <td>(equal)</td>
         </tr>
         <tr>
             <td><label for="cussalesytd">Sales YTD</label>:</td>
-            <td><input type="number" name="cussalesytd" id="cussalesytd" /></td>
+            <td><input type="number" name="cussalesytd" id="cussalesytd" value="<%= cust.cusstate %>"/></td>
             <td>(greater than or equal)</td>
         </tr>
         <tr>
             <td><label for="cussalesprev">Previous Years Sales</label>:</td>
-            <td><input type="number" name="cussalesprev" id="cussalesprev" /></td>
+            <td><input type="number" name="cussalesprev" id="cussalesprev" value="<%= cust.cussalesprev %>" /></td>
             <td>(greater than or equal)</td>
         </tr>
         <tr>
-            <td span="2">
-                <input type="submit" value="Find" />
-                <input type="reset" value="Reset" />
+            <td span="2" >
+                <input type="submit" class="btn btn-primary" value="Find" />
+                <input type="reset" class="btn btn-primary" value="Reset" />
             </td>
         </tr>
     </table>
 </form>
 
-<!-- Omitted Error Checking / Needs to be added -->
+
 <% if (type === "post") { %>
     <% if (result.result.length === 0) { %>
         <h3>No records found!</h3>

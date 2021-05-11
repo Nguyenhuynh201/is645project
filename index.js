@@ -47,45 +47,56 @@ app.get("/", (req, res) => {
 
 
 app.get("/search", async (req, res) => {
-    // Omitted validation check
-    const totRecs = await dblib.getTotalRecords();
-    res.render("search", {
-        type: "get",
-        totRecs: totRecs.totRecords
-    });
+  // Omitted validation check
+  const totRecs = await dblib.getTotalRecords();
+  //Create an empty customer object (To populate form with values)
+  const cust = {
+      cusid: "",
+      cusfname: "",
+      cuslname: "",
+      cusstate: "",
+      cussalesytd: "",
+      cussalesprev: ""
+
+  };
+  res.render("search", {
+      type: "get",
+      totRecs: totRecs.totRecords,
+      cust: cust
+  });
 });
 
 app.post("/search", async (req, res) => {
-    // Omitted validation check
-    //  Can get this from the page rather than using another DB call.
-    //  Add it as a hidden form value.
-    const totRecs = await dblib.getTotalRecords();
+  // Omitted validation check
+  //  Can get this from the page rather than using another DB call.
+  //  Add it as a hidden form value.
+  const totRecs = await dblib.getTotalRecords();
 
-    dblib.findCustomers(req.body)
-        .then(result => {
-            res.render("search", {
-                type: "post",
-                totRecs: totRecs.totRecords,
-                foundRecs: result.result.length,
-                result: result,
-                prod: req.body
-            })
-        })
-        .catch(err => {
-            res.render("search", {
-                type: "post",
-                totRecs: totRecs.totRecords,
-                result: `Unexpected Error: ${err.message}`,
-                prod: req.body
-            });
-        });
+  dblib.findCustomers(req.body)
+      .then(result => {
+          res.render("search", {
+              type: "post",
+              totRecs: totRecs.totRecords,
+              foundRecs: result.result.length,
+              result: result,
+              cust: req.body
+          })
+      })
+      .catch(err => {
+          res.render("search", {
+              type: "post",
+              totRecs: totRecs.totRecords,
+              result: `Unexpected Error: ${err.message}`,
+              cust: req.body
+          });
+      });
 });
 
 app.get("/search", async (req, res) => {
     // Omitted validation check
     const totRecs = await dblib.getTotalRecords();
     //Create an empty customer object (To populate form with values)
-    const cus = {
+    const cust = {
         cusid: "",
         cusfname: "",
         cuslname: "",
@@ -97,7 +108,7 @@ app.get("/search", async (req, res) => {
     res.render("search", {
         type: "get",
         totRecs: totRecs.totRecords,
-        cus: cus
+        cust: cust
     });
 });
 
@@ -144,36 +155,40 @@ app.get("/delete/:id", (req, res) => {
   
 // GET /create
 app.get("/create", (req, res) => {
-    res.render("create", { model: {} });
+  res.render("create", { model: {} });
+});
+
+
+// POST /create
+app.post("/create", (req, res) => {
+  const sql = "INSERT INTO Customer (cusid, cusfname, cuslname, cusstate, cussalesytd, cussalesprev) VALUES ($1, $2, $3, $4, $5, $6)";
+  const customer = [req.body.cusid, req.body.cusfname, req.body.cuslname,req.body.cusstate,req.body.cussalesytd,req.body.cussalesprev];
+  pool.query(sql, customer, (err, result) => {
+    // if (err) ...
+    res.redirect("/create");
   });
-  
-  
-  // POST /create
-  app.post("/create", (req, res) => {
-    const sql = "INSERT INTO Customer (cusid, cusfname, cuslname, cusstate, cussalesytd, cussalesprev) VALUES ($1, $2, $3, $4, $5, $6)";
-    const customer = [req.body.cusid, req.body.cusfname, req.body.cuslname,req.body.cusstate,req.body.cussalesytd,req.body.cussalesprev];
-    pool.query(sql, customer, (err, result) => {
-      // if (err) ...
-      res.redirect("/create");
-    });
-  });
-  
-  
+});
+
+
+
   // GET /input
 
 
  app.get("/input", async (req, res) => {
   // Omitted validation check
+  var message = "";
   const totRecs = await dblib.getTotalRecords();
   res.render("input", {
       type: "get",
-      totRecs: totRecs.totRecords
+      totRecs: totRecs.totRecords,
+      message: message
   });
 });
  
    // POST /input
 
  app.post("/input",  upload.single('filename'), (req, res) => {
+
      if(!req.file || Object.keys(req.file).length === 0) {
          message = "Error: Import file not uploaded";
          return res.send(message);
@@ -181,7 +196,8 @@ app.get("/create", (req, res) => {
      //Read file line by line, inserting records
      const buffer = req.file.buffer; 
      const lines = buffer.toString().split(/\r?\n/);
- 
+     var recordsinserted = 0
+     var recordsnotinserted = 0 
      lines.forEach(line => {
           //console.log(line);
           product = line.split(",");
@@ -189,13 +205,15 @@ app.get("/create", (req, res) => {
           const sql = "INSERT INTO Customer (cusid, cusfname, cuslname, cusstate, cussalesytd, cussalesprev) VALUES ($1, $2, $3, $4, $5, $6)";
           pool.query(sql, product, (err, result) => {
               if (err) {
+                  recordsnotinserted ++;
                   console.log(`Insert Error.  Error message: ${err.message}`);
               } else {
+                  recordsinserted ++;
                   console.log(`Inserted successfully`);
               }
          });
      });
-     message = `Processing Complete - Processed ${lines.length} records`;
+     message = `Import Summary \n Records Processed: ${lines.length} records \n Records Inserted successfully: ${recordsinserted} \n Records Not Inserted: ${recordsnotinserted} \n Error:`;
      res.send(message);
  });
 
@@ -222,7 +240,7 @@ app.get("/create", (req, res) => {
                  output += `${customer.cusid},${customer.cusfname},${customer.cuslname},${customer.cusstate},${customer.cussalesytd},${customer.cussalesprev}\r\n`;
              });
              res.header("Content-Type", "text/csv");
-             res.attachment("export.csv");
+             res.attachment(`output.txt`);
              return res.send(output);
          };
      });

@@ -3,8 +3,8 @@
 <h4>Total number of records in the database: <%= totRecs %> </h4>
 <h4>Select a file with customers for Database Insert</h4>
 <form>
-    <input type="file" name="filename" required><p></p>
-    <input type="submit">
+    <input type="file" name="filename"  required><p></p>
+    <input type="submit" class="btn btn-primary" value="Import Customers" >
 </form>
 <p id="result"></p>
 
@@ -36,5 +36,11 @@
         });
     });
     </script>
+
+
+<% if(message.substring(0,10) === "Processing") { %>
+    <h2>Wait for Results</h2>
+<% } %> 
+
 
 <%- include("_footer") -%>
